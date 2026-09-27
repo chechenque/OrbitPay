@@ -57,42 +57,22 @@ class PagoEngine:
             aprobado = metodo_pago.procesar(total)
 
             if not aprobado:
-                transaccion.rechazar()
-
-                evento_rechazado = PagoRechazado(
+                return self._rechazar_pago(
                     transaccion=transaccion,
-                    mensaje="El método de pago rechazó la operación.",
-                )
-                self._notificar(evento_rechazado)
-
-                self._transacciones_procesadas.add(transaccion.id)
-
-                return ResultadoPago(
-                    transaccion=transaccion,
-                    aprobado=False,
                     comision=comision,
                     total=total,
+                    mensaje="El método de pago rechazó la operación.",
                 )
 
             cuenta.retirar(total)
             transaccion.aprobar()
 
         except InsufficientBalanceError:
-            transaccion.rechazar()
-
-            evento_rechazado = PagoRechazado(
+            return self._rechazar_pago(
                 transaccion=transaccion,
-                mensaje="Saldo insuficiente en la cuenta.",
-            )
-            self._notificar(evento_rechazado)
-
-            self._transacciones_procesadas.add(transaccion.id)
-
-            return ResultadoPago(
-                transaccion=transaccion,
-                aprobado=False,
                 comision=comision,
                 total=total,
+                mensaje="Saldo insuficiente en la cuenta.",
             )
 
         evento_aprobado = PagoAprobado(
@@ -106,6 +86,31 @@ class PagoEngine:
         return ResultadoPago(
             transaccion=transaccion,
             aprobado=True,
+            comision=comision,
+            total=total,
+        )
+
+    def _rechazar_pago(
+        self,
+        transaccion: Transaccion,
+        comision: float,
+        total: float,
+        mensaje: str,
+    ) -> ResultadoPago:
+        """Gestiona de forma centralizada el rechazo de un pago."""
+        transaccion.rechazar()
+
+        evento_rechazado = PagoRechazado(
+            transaccion=transaccion,
+            mensaje=mensaje,
+        )
+        self._notificar(evento_rechazado)
+
+        self._transacciones_procesadas.add(transaccion.id)
+
+        return ResultadoPago(
+            transaccion=transaccion,
+            aprobado=False,
             comision=comision,
             total=total,
         )
