@@ -57,7 +57,7 @@ class PagoEngine:
             aprobado = metodo_pago.procesar(total)
 
             if not aprobado:
-                transaccion.estado = "RECHAZADA"
+                transaccion.rechazar()
 
                 evento_rechazado = PagoRechazado(
                     transaccion=transaccion,
@@ -75,10 +75,10 @@ class PagoEngine:
                 )
 
             cuenta.retirar(total)
-            transaccion.estado = "APROBADA"
+            transaccion.aprobar()
 
         except InsufficientBalanceError:
-            transaccion.estado = "RECHAZADA"
+            transaccion.rechazar()
 
             evento_rechazado = PagoRechazado(
                 transaccion=transaccion,

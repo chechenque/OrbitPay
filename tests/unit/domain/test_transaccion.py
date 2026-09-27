@@ -58,3 +58,40 @@ def test_transacciones_se_comparan_por_monto() -> None:
 
     assert menor < mayor
     assert mayor > menor
+
+
+def test_transaccion_puede_aprobarse() -> None:
+    transaccion = Transaccion(
+        id="TRX-009",
+        cuenta_id="CTA-001",
+        monto=100.0,
+    )
+
+    transaccion.aprobar()
+
+    assert transaccion.estado == "APROBADA"
+
+
+def test_transaccion_puede_rechazarse() -> None:
+    transaccion = Transaccion(
+        id="TRX-010",
+        cuenta_id="CTA-001",
+        monto=100.0,
+    )
+
+    transaccion.rechazar()
+
+    assert transaccion.estado == "RECHAZADA"
+
+
+def test_transaccion_rechaza_estado_invalido() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="Estado inválido",
+    ):
+        Transaccion(
+            id="TRX-011",
+            cuenta_id="CTA-001",
+            monto=100.0,
+            _estado="INEXISTENTE",
+        )
