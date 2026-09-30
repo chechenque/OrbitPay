@@ -1,0 +1,539 @@
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================
+% PAQUETES
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{parskip}
+
+% ============================================================
+% CONFIGURACIÓN
+% ============================================================
+\geometry{
+    top=2.2cm,
+    bottom=2.2cm,
+    left=2.4cm,
+    right=2.4cm
+}
+
+\definecolor{orbitblue}{HTML}{17365D}
+\definecolor{orbitlight}{HTML}{EAF0F7}
+\definecolor{orbitgray}{HTML}{555555}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=orbitblue,
+    urlcolor=orbitblue,
+    pdftitle={OrbitPay OO -- Executive Summary},
+    pdfauthor={Luis Angel Leyva Castillo},
+    pdfsubject={Proyecto integrador de Programación Orientada a Objetos}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textsc{OrbitPay OO}}
+\rhead{\textsc{Executive Summary}}
+\cfoot{\thepage}
+\setlength{\headheight}{14pt}
+
+\titleformat{\section}
+    {\Large\bfseries\color{orbitblue}}
+    {\thesection.}
+    {0.6em}
+    {}
+
+\titleformat{\subsection}
+    {\large\bfseries\color{orbitblue}}
+    {\thesubsection.}
+    {0.5em}
+    {}
+
+\setlist[itemize]{
+    leftmargin=1.2cm,
+    itemsep=2pt,
+    topsep=4pt
+}
+
+% ============================================================
+% DOCUMENTO
+% ============================================================
+\begin{document}
+
+% ============================================================
+% PORTADA
+% ============================================================
+\begin{titlepage}
+    \centering
+
+    \vspace*{2.0cm}
+
+    {\Huge\bfseries\color{orbitblue} OrbitPay OO\par}
+
+    \vspace{0.5cm}
+
+    {\Large Motor de pagos y suscripciones orientado a objetos\par}
+
+    \vspace{1.5cm}
+
+    \rule{\textwidth}{1pt}
+
+    \vspace{0.6cm}
+
+    {\LARGE\bfseries Executive Summary\par}
+
+    \vspace{0.6cm}
+
+    \rule{\textwidth}{1pt}
+
+    \vspace{2cm}
+
+    \begin{tabular}{rl}
+        \textbf{Autor:} & Luis Angel Leyva Castillo \\[0.3cm]
+        \textbf{Versión:} & 1.0.0 \\[0.3cm]
+        \textbf{Tecnología:} & Python 3.12.14 \\[0.3cm]
+        \textbf{Licencia:} & MIT \\[0.3cm]
+        \textbf{Tipo de entrega:} &
+        Proyecto integrador -- Módulo 2
+    \end{tabular}
+
+    \vfill
+
+    \begin{minipage}{0.82\textwidth}
+        \centering
+        \small
+        Documento ejecutivo de síntesis de la solución,
+        arquitectura, decisiones técnicas, pruebas,
+        calidad y release final de OrbitPay OO.
+    \end{minipage}
+
+    \vspace{1cm}
+
+    {\small \today}
+
+\end{titlepage}
+
+% ============================================================
+% RESUMEN EJECUTIVO
+% ============================================================
+\section{Resumen ejecutivo}
+
+OrbitPay OO es un motor de pagos y suscripciones desarrollado
+en Python mediante Programación Orientada a Objetos, diseñado
+como proyecto integrador del Módulo 2.
+
+Su propósito es transformar un procesamiento monolítico de pagos,
+caracterizado por lógica condicional anidada, riesgo de cargos
+duplicados, inconsistencias de saldo y ausencia de pruebas
+automatizadas, en una solución modular, extensible y verificable.
+
+La solución implementa un modelo de dominio compuesto por
+cuentas, transacciones y suscripciones, junto con una abstracción
+polimórfica para métodos de pago. La arquitectura incorpora los
+patrones Factory, Strategy y Observer, así como principios SOLID
+y mecanismos de validación, encapsulamiento e idempotencia.
+
+El release final corresponde a la versión \textbf{1.0.0},
+distribuible como paquete Python mediante archivos
+\texttt{wheel} y \texttt{tar.gz}. El proyecto alcanzó
+\textbf{98\,\% de cobertura de código}, cuenta con pruebas
+unitarias y de integración, validación estática mediante
+\texttt{mypy --strict}, análisis mediante Ruff, formateo
+mediante Black y automatización mediante pre-commit y
+GitHub Actions.
+
+% ============================================================
+% PROBLEMA
+% ============================================================
+\section{Problema y objetivo}
+
+El escenario inicial de OrbitPay presentaba características
+propias de un sistema monolítico: lógica de negocio concentrada,
+decisiones basadas en tipos concretos de métodos de pago,
+ausencia de separación clara de responsabilidades y falta de
+pruebas automatizadas.
+
+Estas características dificultaban la incorporación de nuevos
+métodos de pago y aumentaban el riesgo de errores relacionados
+con el procesamiento de operaciones y la consistencia del saldo.
+
+El objetivo fue desarrollar una solución orientada a objetos
+que permitiera:
+
+\begin{itemize}
+    \item encapsular el estado crítico del dominio;
+    \item validar las reglas fundamentales del negocio;
+    \item utilizar polimorfismo para los métodos de pago;
+    \item desacoplar el cálculo de comisiones;
+    \item implementar notificaciones mediante eventos;
+    \item evitar el procesamiento duplicado de transacciones;
+    \item aplicar principios SOLID;
+    \item automatizar pruebas y controles de calidad;
+    \item generar un paquete Python instalable y reproducible.
+\end{itemize}
+
+% ============================================================
+% ARQUITECTURA
+% ============================================================
+\section{Solución y arquitectura}
+
+OrbitPay se estructura en cuatro áreas principales:
+
+\begin{description}
+    \item[\textbf{Dominio:}]
+    contiene \texttt{Cuenta}, \texttt{Transaccion},
+    \texttt{Suscripcion} y las excepciones del negocio.
+
+    \item[\textbf{Pagos:}]
+    define la abstracción \texttt{MetodoPago} y sus
+    implementaciones \texttt{Tarjeta},
+    \texttt{Transferencia} y \texttt{Wallet}.
+
+    \item[\textbf{Patrones:}]
+    concentra las implementaciones de Factory,
+    Strategy y Observer.
+
+    \item[\textbf{Motor:}]
+    \texttt{PagoEngine} coordina el procesamiento de las
+    operaciones mediante abstracciones y dependencias
+    inyectadas.
+\end{description}
+
+El motor no necesita conocer los detalles concretos de cada
+método de pago. Recibe una instancia de \texttt{MetodoPago},
+una estrategia de comisión y un gestor de eventos, reduciendo
+el acoplamiento entre componentes.
+
+% ============================================================
+% DIAGRAMA DE ARQUITECTURA
+% ============================================================
+\section{Diagrama de clases}
+
+La Figura~\ref{fig:class-diagram} presenta la estructura
+principal de OrbitPay OO y las relaciones entre las entidades
+del dominio, los métodos de pago, las estrategias de comisión,
+el motor de pagos y el sistema de eventos.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[
+        width=\textwidth,
+        height=0.62\textheight,
+        keepaspectratio
+    ]{docs/class-diagram.pdf}
+    \caption{Diagrama de clases de OrbitPay OO.}
+    \label{fig:class-diagram}
+\end{figure}
+
+% ============================================================
+% POO
+% ============================================================
+\section{Programación Orientada a Objetos}
+
+El proyecto evidencia los principales conceptos estudiados
+durante el módulo.
+
+\subsection{Encapsulamiento}
+
+El saldo de \texttt{Cuenta} se mantiene como estado interno y
+se modifica mediante operaciones controladas como
+\texttt{depositar()} y \texttt{retirar()}.
+
+El estado de \texttt{Transaccion} también se controla mediante
+operaciones de dominio como \texttt{aprobar()} y
+\texttt{rechazar()}.
+
+\subsection{Abstracción}
+
+\texttt{MetodoPago}, \texttt{EstrategiaComision} y
+\texttt{ObservadorPago} definen contratos mediante clases
+abstractas.
+
+\subsection{Herencia}
+
+Los diferentes métodos de pago implementan el contrato común
+de \texttt{MetodoPago}, mientras que las estrategias concretas
+implementan \texttt{EstrategiaComision}.
+
+\subsection{Polimorfismo}
+
+El motor procesa cualquier implementación válida de
+\texttt{MetodoPago} sin utilizar condicionales basados en el
+tipo concreto.
+
+\subsection{Composición}
+
+\texttt{PagoEngine} recibe sus dependencias mediante el
+constructor, permitiendo sustituir estrategias y gestores de
+eventos sin modificar el motor principal.
+
+% ============================================================
+% PATRONES
+% ============================================================
+\section{Patrones de diseño}
+
+\subsection{Factory Method}
+
+\texttt{MetodoPagoFactory} centraliza la creación de métodos
+de pago y permite registrar nuevas implementaciones mediante
+un registro extensible.
+
+\subsection{Strategy}
+
+\texttt{EstrategiaComision} separa el algoritmo de cálculo de
+comisión del motor de pagos.
+
+Se implementaron:
+
+\begin{itemize}
+    \item \texttt{ComisionFija};
+    \item \texttt{ComisionPorcentual}.
+\end{itemize}
+
+\subsection{Observer}
+
+\texttt{GestorEventosPago} permite notificar eventos de pago
+sin acoplar directamente el motor con los componentes
+consumidores.
+
+Se contemplan los eventos:
+
+\begin{itemize}
+    \item \texttt{PagoAprobado};
+    \item \texttt{PagoRechazado}.
+\end{itemize}
+
+% ============================================================
+% SOLID
+% ============================================================
+\section{Principios SOLID}
+
+\begin{description}
+    \item[\textbf{SRP -- Single Responsibility Principle:}]
+    responsabilidades separadas entre dominio, métodos de
+    pago, cálculo de comisiones, eventos y procesamiento.
+
+    \item[\textbf{OCP -- Open/Closed Principle:}]
+    Factory y Strategy permiten extender comportamientos sin
+    modificar el motor principal.
+
+    \item[\textbf{LSP -- Liskov Substitution Principle:}]
+    las implementaciones de \texttt{MetodoPago} cumplen el
+    contrato definido por la abstracción.
+
+    \item[\textbf{ISP -- Interface Segregation Principle:}]
+    las interfaces se mantienen pequeñas y enfocadas.
+
+    \item[\textbf{DIP -- Dependency Inversion Principle:}]
+    \texttt{PagoEngine} depende de abstracciones y recibe
+    sus dependencias mediante inyección.
+\end{description}
+
+% ============================================================
+% REFACTOR
+% ============================================================
+\section{Refactorización}
+
+Durante el desarrollo se identificaron y corrigieron tres
+problemas concretos.
+
+\subsection{Refactor 1 -- Estado de transacción}
+
+Se sustituyó la modificación directa del estado por atributos
+internos y operaciones de dominio
+(\texttt{aprobar()} y \texttt{rechazar()}).
+
+\subsection{Refactor 2 -- Factory extensible}
+
+La creación de métodos de pago se transformó en un registro
+extensible, permitiendo incorporar nuevos tipos sin modificar
+la lógica central de la Factory.
+
+\subsection{Refactor 3 -- Lógica de rechazo duplicada}
+
+La gestión de rechazos se centralizó mediante
+\texttt{\_rechazar\_pago()}, eliminando duplicación dentro del
+motor.
+
+% ============================================================
+% PRUEBAS
+% ============================================================
+\section{Pruebas y calidad}
+
+El proyecto cuenta con pruebas unitarias para dominio, métodos
+de pago y patrones, además de pruebas de integración para
+\texttt{PagoEngine}.
+
+La ejecución final alcanzó:
+
+\begin{center}
+    {\Large\bfseries 98\,\% de cobertura}
+\end{center}
+
+superando el mínimo requerido de 80\,\%.
+
+Los controles automatizados incluyen:
+
+\begin{itemize}
+    \item \texttt{pytest};
+    \item \texttt{pytest-cov};
+    \item Black;
+    \item Ruff;
+    \item Mypy en modo \texttt{strict};
+    \item pre-commit;
+    \item GitHub Actions.
+\end{itemize}
+
+El pipeline de integración continua ejecuta las verificaciones
+de formato, análisis estático, tipado y pruebas con un requisito
+mínimo de 80\,\% de cobertura.
+
+% ============================================================
+% IDEMPOTENCIA
+% ============================================================
+\section{Idempotencia y reglas de negocio}
+
+El motor mantiene un registro de transacciones procesadas para
+impedir que una misma transacción sea procesada nuevamente.
+
+También se aplican reglas fundamentales del dominio:
+
+\begin{itemize}
+    \item los montos deben ser mayores que cero;
+    \item el saldo no puede ser negativo;
+    \item una cuenta no puede retirar más fondos de los disponibles;
+    \item los identificadores obligatorios deben ser válidos;
+    \item los estados de las transacciones están restringidos a valores definidos.
+\end{itemize}
+
+% ============================================================
+% RELEASE
+% ============================================================
+\section{Empaquetado y release}
+
+OrbitPay fue empaquetado como versión \textbf{1.0.0} mediante
+\texttt{python -m build}.
+
+Se generaron los siguientes artefactos:
+
+\begin{itemize}
+    \item \texttt{orbitpay-1.0.0-py3-none-any.whl};
+    \item \texttt{orbitpay-1.0.0.tar.gz}.
+\end{itemize}
+
+La instalación del wheel fue validada en un entorno virtual
+independiente del entorno de desarrollo.
+
+La prueba confirmó:
+
+\begin{itemize}
+    \item instalación en \texttt{site-packages};
+    \item versión instalada \texttt{1.0.0};
+    \item importación correcta del paquete;
+    \item ejecución funcional de componentes del dominio.
+\end{itemize}
+
+% ============================================================
+% RESULTADOS
+% ============================================================
+\section{Resultados}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{0.85\textwidth}{
+    >{\bfseries}l
+    X
+}
+\toprule
+Indicador & Resultado \\
+\midrule
+Versión final & 1.0.0 \\
+Cobertura & 98\,\% \\
+Mínimo requerido & 80\,\% \\
+Patrones implementados & 3 \\
+Refactors documentados & 3 \\
+Tipado & Mypy \texttt{strict} \\
+Formateo & Black \\
+Análisis estático & Ruff \\
+Automatización & Pre-commit + GitHub Actions \\
+Distribución & Wheel + Source Distribution \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+
+% ============================================================
+% ENTREGABLES
+% ============================================================
+\section{Entregables}
+
+El repositorio contiene:
+
+\begin{itemize}
+    \item código fuente del dominio;
+    \item métodos de pago;
+    \item patrones de diseño;
+    \item motor de procesamiento;
+    \item pruebas unitarias e integración;
+    \item documentación de las ocho lecciones;
+    \item spikes técnicos;
+    \item diagrama de clases UML;
+    \item README;
+    \item LICENSE;
+    \item configuración de pre-commit;
+    \item workflow de integración continua;
+    \item artefactos de distribución de la versión 1.0.0.
+\end{itemize}
+
+% ============================================================
+% CONCLUSIÓN
+% ============================================================
+\section{Conclusión}
+
+OrbitPay OO integra los conceptos fundamentales de Programación
+Orientada a Objetos en una solución de dominio coherente,
+extensible y verificable.
+
+El proyecto evoluciona desde una problemática monolítica hacia
+una arquitectura basada en abstracciones, encapsulamiento,
+polimorfismo, composición y patrones de diseño.
+
+La combinación de pruebas automatizadas, cobertura de código,
+análisis estático, integración continua y empaquetado reproducible
+proporciona evidencia técnica del funcionamiento de la solución
+y de su preparación para distribución como paquete Python.
+
+El release \textbf{OrbitPay OO 1.0.0} representa el cierre técnico
+del proyecto integrador y reúne en un único artefacto las
+competencias desarrolladas durante el módulo.
+
+% ============================================================
+% CIERRE
+% ============================================================
+\vfill
+
+\begin{center}
+    \rule{0.7\textwidth}{0.5pt}
+
+    \vspace{0.3cm}
+
+    \textbf{OrbitPay OO -- Release 1.0.0}
+
+    \smallskip
+
+    Luis Angel Leyva Castillo
+\end{center}
+
+\end{document}
