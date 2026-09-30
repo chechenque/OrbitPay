@@ -18,8 +18,7 @@ Para definir este contrato se creó la clase abstracta:
 ```python
 class MetodoPago(ABC):
     @abstractmethod
-    def procesar(self, monto: float) -> bool:
-        ...
+    def procesar(self, monto: float) -> bool: ...
 ```
 La clase funciona como una abstracción que establece qué comportamiento debe proporcionar cualquier método de pago.
 
@@ -168,8 +167,7 @@ La arquitectura permite incorporar nuevos métodos de pago.
 
 Por ejemplo, puede registrarse una nueva implementación:
 ```python
-class Criptomoneda(MetodoPago):
-    ...
+class Criptomoneda(MetodoPago): ...
 ```
 y posteriormente registrarse en la Factory:
 ```python

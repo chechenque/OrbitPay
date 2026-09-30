@@ -1,0 +1,45 @@
+name: OrbitPay CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar proyecto y dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Black
+        run: python -m black --check .
+
+      - name: Ruff
+        run: python -m ruff check .
+
+      - name: Mypy
+        run: python -m mypy --strict orbitpay/
+
+      - name: Pytest y cobertura
+        run: |
+          python -m pytest \
+            --cov=orbitpay \
+            --cov-report=term-missing \
+            --cov-fail-under=80

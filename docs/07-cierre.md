@@ -241,8 +241,7 @@ Por ejemplo:
 ```python
 class MetodoPago(ABC):
     @abstractmethod
-    def procesar(self, monto: float) -> bool:
-        ...
+    def procesar(self, monto: float) -> bool: ...
 ```
 La interfaz únicamente expone la operación necesaria para procesar un pago.
 

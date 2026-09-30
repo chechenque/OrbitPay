@@ -154,8 +154,7 @@ _estado
 y se expuso mediante:
 ```python
 @property
-def estado(self) -> str:
-    ...
+def estado(self) -> str: ...
 ```
 Las transiciones se realizan mediante:
 ```python

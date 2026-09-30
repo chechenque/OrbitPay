@@ -215,7 +215,7 @@ Esto evita que una misma transacción sea procesada dos veces por el motor.
 
 1. Clonar el repositorio
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/chechenque/OrbitPay.git
 cd OrbitPay
 ```
 2. Crear entorno virtual
@@ -327,8 +327,7 @@ Durante el desarrollo se identificaron y corrigieron tres problemas de diseño:
 Se encapsuló el estado mediante:
 ```python
 @property
-def estado(self) -> str:
-    ...
+def estado(self) -> str: ...
 ```
 y operaciones explícitas:
 ```python
